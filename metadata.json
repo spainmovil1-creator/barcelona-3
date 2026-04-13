@@ -1,0 +1,7 @@
+{
+  "name": "Historia de Barcelona Interactiva",
+  "description": "Una guía turística interactiva sobre la historia de Barcelona con un asistente de voz impulsado por Gemini Live.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
