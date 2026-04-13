@@ -11,11 +11,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <header className="relative w-full h-screen bg-stone-900 overflow-hidden">
+      <header className="relative w-full min-h-[100svh] aspect-[3/4] sm:aspect-[4/3] bg-stone-900 overflow-hidden">
+        {/* Imagen para móvil (vertical) */}
         <img 
-          src="/img/portada1horizontal.jpg?v=3" 
+          src="/img/portada3vertical.jpg?v=15" 
           alt="Historia de Barcelona"
-          className="absolute inset-0 w-full h-full object-cover object-top"
+          className="absolute inset-0 w-full h-full object-cover object-[50%_25%] sm:hidden"
+        />
+        {/* Imagen para tablet (cuadrada 1:1) */}
+        <img 
+          src="/img/portada_tablet_cuadrada.jpg?v=1" 
+          alt="Historia de Barcelona"
+          className="absolute inset-0 w-full h-full object-cover object-center hidden sm:block lg:hidden"
+        />
+        {/* Imagen para ordenador (horizontal) */}
+        <img 
+          src="/img/portada1horizontal.jpg?v=15" 
+          alt="Historia de Barcelona"
+          className="absolute inset-0 w-full h-full object-cover object-[50%_25%] hidden lg:block"
         />
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white drop-shadow-lg">
           <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
