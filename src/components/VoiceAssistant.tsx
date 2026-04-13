@@ -10,7 +10,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiClient: GoogleGenAI | null = null;
+
+async function getAiClient() {
+  if (!aiClient) {
+    // We fetch the API key from our backend to avoid exposing it in the client bundle
+    // and to ensure it works in production where process.env is not replaced by Vite.
+    const res = await fetch('/api/config');
+    const data = await res.json();
+    if (!data.geminiApiKey) {
+      throw new Error("GEMINI_API_KEY no encontrada en el servidor.");
+    }
+    aiClient = new GoogleGenAI({ apiKey: data.geminiApiKey });
+  }
+  return aiClient;
+}
 
 const showStageOnScreen: FunctionDeclaration = {
   name: "showStageOnScreen",
@@ -76,6 +90,8 @@ export default function VoiceAssistant() {
       
       source.connect(processor);
       processor.connect(audioContext.destination);
+
+      const ai = await getAiClient();
 
       const sessionPromise = ai.live.connect({
         model: "gemini-3.1-flash-live-preview",
