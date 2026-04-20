@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { historyData } from '../data';
+import { historyDataCa } from '../data_ca';
+import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, MapPin, Home } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -8,10 +10,12 @@ import Markdown from 'react-markdown';
 export default function SectionPage() {
   const { sectionId } = useParams<{ sectionId: string }>();
   const location = useLocation();
-  const section = historyData.find(s => s.id === sectionId);
+  const { language } = useLanguage();
+  const currentData = language === 'ca' ? historyDataCa : historyData;
+  const section = currentData.find(s => s.id === sectionId);
   const stageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const allStages = historyData.flatMap(s => s.stages.map(st => ({ ...st, sectionId: s.id })));
+  const allStages = currentData.flatMap(s => s.stages.map(st => ({ ...st, sectionId: s.id })));
 
   useEffect(() => {
     if (location.hash && stageRefs.current[location.hash.substring(1)]) {
@@ -27,9 +31,9 @@ export default function SectionPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50 text-stone-900">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Sección no encontrada</h1>
+          <h1 className="text-4xl font-bold mb-4">{language === 'ca' ? 'Secció no trobada' : 'Sección no encontrada'}</h1>
           <Link to="/" className="text-blue-600 hover:underline flex items-center justify-center gap-2">
-            <ArrowLeft className="w-4 h-4" /> Volver al inicio
+            <ArrowLeft className="w-4 h-4" /> {language === 'ca' ? 'Tornar a l\'inici' : 'Volver al inicio'}
           </Link>
         </div>
       </div>
@@ -55,7 +59,7 @@ export default function SectionPage() {
             onClick={() => window.scrollTo(0, 0)}
             className="text-[#7a4900] hover:text-[#111827] transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap bg-[#fff3c2]/80 border border-[#7a4900]/20 px-4 py-2 rounded-full backdrop-blur-sm"
           >
-            <Home className="w-4 h-4" /> <span className="hidden sm:inline">Índice Principal</span>
+            <Home className="w-4 h-4" /> <span className="hidden sm:inline">{language === 'ca' ? 'Índex Principal' : 'Índice Principal'}</span>
           </Link>
         </div>
       </header>
@@ -90,7 +94,7 @@ export default function SectionPage() {
                   <div className="absolute bottom-0 left-0 p-8 w-full">
                     <div className="flex items-center gap-2 text-[#7a4900]/80 mb-3 font-medium tracking-wide uppercase text-sm">
                       <MapPin className="w-4 h-4" />
-                      <span>{stage.id === 'etapa-final' ? 'Conclusión' : `Etapa ${index + 1}`}</span>
+                      <span>{stage.id === 'etapa-final' ? (language === 'ca' ? 'Conclusió' : 'Conclusión') : `Etapa ${index + 1}`}</span>
                     </div>
                     <h2 
                       className="text-3xl md:text-4xl font-bold leading-tight text-[#7a4900]"
@@ -116,7 +120,7 @@ export default function SectionPage() {
                         className="flex items-center gap-2 text-[#7a4900]/80 hover:text-[#7a4900] font-medium transition-colors w-full sm:w-auto justify-center sm:justify-start"
                       >
                         <ArrowLeft className="w-4 h-4" /> 
-                        <span className="truncate max-w-[200px]">Anterior</span>
+                        <span className="truncate max-w-[200px]">{language === 'ca' ? 'Anterior' : 'Anterior'}</span>
                       </Link>
                     ) : <div className="hidden sm:block w-[100px]" />}
                     
@@ -125,7 +129,7 @@ export default function SectionPage() {
                       onClick={() => window.scrollTo(0, 0)}
                       className="flex items-center gap-2 text-[#7a4900]/60 hover:text-[#7a4900] font-medium transition-colors w-full sm:w-auto justify-center"
                     >
-                      <Home className="w-4 h-4" /> Índice
+                      <Home className="w-4 h-4" /> {language === 'ca' ? 'Índex' : 'Índice'}
                     </Link>
 
                     {nextStage ? (
@@ -133,7 +137,7 @@ export default function SectionPage() {
                         to={`/seccion/${nextStage.sectionId}#${nextStage.id}`}
                         className="flex items-center gap-2 text-[#7a4900]/80 hover:text-[#7a4900] font-medium transition-colors w-full sm:w-auto justify-center sm:justify-end"
                       >
-                        <span className="truncate max-w-[200px]">Siguiente</span>
+                        <span className="truncate max-w-[200px]">{language === 'ca' ? 'Següent' : 'Siguiente'}</span>
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     ) : <div className="hidden sm:block w-[100px]" />}

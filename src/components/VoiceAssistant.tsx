@@ -3,28 +3,17 @@ import { GoogleGenAI, LiveServerMessage, Modality, Type, FunctionDeclaration } f
 import { Mic, Square, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { historyData } from '../data';
+import { historyDataCa } from '../data_ca';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+
+import { useLanguage } from '../contexts/LanguageContext';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-let aiClient: GoogleGenAI | null = null;
-
-async function getAiClient() {
-  if (!aiClient) {
-    // We fetch the API key from our backend to avoid exposing it in the client bundle
-    // and to ensure it works in production where process.env is not replaced by Vite.
-    const res = await fetch('/api/config');
-    const data = await res.json();
-    if (!data.geminiApiKey) {
-      throw new Error("GEMINI_API_KEY no encontrada en el servidor.");
-    }
-    aiClient = new GoogleGenAI({ apiKey: data.geminiApiKey });
-  }
-  return aiClient;
-}
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const showStageOnScreen: FunctionDeclaration = {
   name: "showStageOnScreen",
@@ -49,15 +38,8 @@ const showStageOnScreen: FunctionDeclaration = {
   }
 };
 
-const systemInstruction = `Eres un guía turístico experto en la Historia de Barcelona.
-Tu objetivo es acompañar al usuario a través de las diferentes etapas históricas de la ciudad.
-Tienes acceso a una herramienta llamada 'showStageOnScreen'.
-REGLA ESTRICTA: ANTES de empezar a hablar o explicar cualquier detalle sobre una etapa específica, DEBES llamar a la función 'showStageOnScreen' con el sectionId y stageId correspondientes para que la pantalla del usuario se mueva a esa etapa.
-Aquí tienes el contexto de las secciones y etapas disponibles:
-${JSON.stringify(historyData.map(s => ({ id: s.id, title: s.title, stages: s.stages.map(st => ({ id: st.id, title: st.title })) })), null, 2)}
-Sé amable, entusiasta y conciso en tus explicaciones.`;
-
 export default function VoiceAssistant() {
+  const { language } = useLanguage();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -91,7 +73,15 @@ export default function VoiceAssistant() {
       source.connect(processor);
       processor.connect(audioContext.destination);
 
-      const ai = await getAiClient();
+      const currentData = language === 'ca' ? historyDataCa : historyData;
+      const systemInstruction = `Eres un guía turístico experto en la Historia de Barcelona.
+Tu objetivo es acompañar al usuario a través de las diferentes etapas históricas de la ciudad.
+Tienes acceso a una herramienta llamada 'showStageOnScreen'.
+REGLA ESTRICTA: ANTES de empezar a hablar o explicar cualquier detalle sobre una etapa específica, DEBES llamar a la función 'showStageOnScreen' con el sectionId y stageId correspondientes para que la pantalla del usuario se mueva a esa etapa.
+El usuario ha seleccionado el idioma: ${language === 'ca' ? 'CATALÁN. DEBES PROPORCIONAR TODA TU RESPUESTA HABLADA ESTRICTAMENTE EN CATALÁN.' : 'ESPAÑOL. DEBES PROPORCIONAR TODA TU RESPUESTA HABLADA EN ESPAÑOL.'}
+Aquí tienes el contexto de las secciones y etapas disponibles:
+${JSON.stringify(currentData.map(s => ({ id: s.id, title: s.title, stages: s.stages.map(st => ({ id: st.id, title: st.title })) })), null, 2)}
+Sé amable, entusiasta y conciso en tus explicaciones.`;
 
       const sessionPromise = ai.live.connect({
         model: "gemini-3.1-flash-live-preview",
@@ -217,9 +207,9 @@ export default function VoiceAssistant() {
     } catch (error: any) {
       console.error("Failed to connect:", error);
       if (error.name === 'NotAllowedError' || error.message.includes('Permission denied')) {
-        setErrorMsg("Acceso al micrófono denegado. Por favor, permite el acceso en tu navegador.");
+        setErrorMsg(language === 'ca' ? "Accés al micròfon denegat. Si us plau, permet l'accés al teu navegador." : "Acceso al micrófono denegado. Por favor, permite el acceso en tu navegador.");
       } else {
-        setErrorMsg("Error al conectar. Revisa tu conexión o permisos.");
+        setErrorMsg(language === 'ca' ? "Error en connectar. Revisa la connexió o permisos." : "Error al conectar. Revisa tu conexión o permisos.");
       }
       setIsConnecting(false);
       disconnect();
@@ -266,13 +256,13 @@ export default function VoiceAssistant() {
             onClick={() => setErrorMsg(null)}
             className="block mt-2 text-xs underline hover:text-red-900"
           >
-            Cerrar
+            {language === 'ca' ? 'Tancar' : 'Cerrar'}
           </button>
         </div>
       )}
       {isConnected && (
         <div className="bg-[#fff3c2]/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-[#7a4900]/20 text-sm font-medium text-[#7a4900] animate-in fade-in slide-in-from-bottom-4">
-          Asistente escuchando...
+          {language === 'ca' ? 'Assistent escoltant...' : 'Asistente escuchando...'}
         </div>
       )}
       <button
