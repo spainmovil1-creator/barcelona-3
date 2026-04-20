@@ -13,7 +13,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+function getAI(): GoogleGenAI {
+  if (!aiInstance) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("GEMINI_API_KEY environment variable is missing.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey: key });
+  }
+  return aiInstance;
+}
 
 const showStageOnScreen: FunctionDeclaration = {
   name: "showStageOnScreen",
@@ -83,6 +93,7 @@ Aquí tienes el contexto de las secciones y etapas disponibles:
 ${JSON.stringify(currentData.map(s => ({ id: s.id, title: s.title, stages: s.stages.map(st => ({ id: st.id, title: st.title })) })), null, 2)}
 Sé amable, entusiasta y conciso en tus explicaciones.`;
 
+      const ai = getAI();
       const sessionPromise = ai.live.connect({
         model: "gemini-3.1-flash-live-preview",
         callbacks: {
@@ -208,6 +219,8 @@ Sé amable, entusiasta y conciso en tus explicaciones.`;
       console.error("Failed to connect:", error);
       if (error.name === 'NotAllowedError' || error.message.includes('Permission denied')) {
         setErrorMsg(language === 'ca' ? "Accés al micròfon denegat. Si us plau, permet l'accés al teu navegador." : "Acceso al micrófono denegado. Por favor, permite el acceso en tu navegador.");
+      } else if (error.message.includes('GEMINI_API_KEY')) {
+        setErrorMsg(language === 'ca' ? "Falta la clau API de Gemini. Configura-la en els ajustaments." : "Falta la API Key de Gemini. Por favor, configúrala en los ajustes.");
       } else {
         setErrorMsg(language === 'ca' ? "Error en connectar. Revisa la connexió o permisos." : "Error al conectar. Revisa tu conexión o permisos.");
       }
