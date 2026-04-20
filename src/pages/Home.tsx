@@ -19,19 +19,22 @@ export default function Home() {
       <header className="relative w-full min-h-[100svh] aspect-[3/4] sm:aspect-[4/3] bg-stone-900 overflow-hidden">
         {/* Imagen para móvil (vertical) */}
         <img 
-          src={language === 'ca' ? "/img/portada3vertical_ca.jpg" : "/img/portada3vertical.jpg?v=16"} 
+          key={`mobile-${language}`}
+          src={language === 'ca' ? "/img/portada3vertical_ca.jpg?v=1" : "/img/portada3vertical.jpg?v=17"} 
           alt="Historia de Barcelona"
           className="absolute inset-0 w-full h-full object-cover object-top sm:hidden"
         />
         {/* Imagen para tablet (cuadrada 1:1) */}
         <img 
-          src={language === 'ca' ? "/img/portada_tablet_cuadrada_ca.jpg" : "/img/portada_tablet_cuadrada.jpg?v=2"} 
+          key={`tablet-${language}`}
+          src={language === 'ca' ? "/img/portada_tablet_cuadrada_ca.jpg?v=1" : "/img/portada_tablet_cuadrada.jpg?v=3"} 
           alt="Historia de Barcelona"
           className="absolute inset-0 w-full h-full object-cover object-top hidden sm:block lg:hidden"
         />
         {/* Imagen para ordenador (horizontal) */}
         <img 
-          src={language === 'ca' ? "/img/portada1horizontal_ca.jpg" : "/img/portada1horizontal.jpg?v=16"} 
+          key={`desktop-${language}`}
+          src={language === 'ca' ? "/img/portada1horizontal_ca.jpg?v=1" : "/img/portada1horizontal.jpg?v=17"} 
           alt="Historia de Barcelona"
           className="absolute inset-0 w-full h-full object-cover object-top hidden lg:block"
         />
